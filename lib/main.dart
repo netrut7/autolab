@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart';
 import 'auth/firebase_auth/firebase_user_provider.dart';
 import 'auth/firebase_auth/auth_util.dart';
 
 import 'backend/firebase/firebase_config.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
@@ -23,6 +27,14 @@ void main() async {
   await initFirebase();
 
   await FlutterFlowTheme.initialize();
+
+  await Firebase.initializeApp();
+  
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: kDebugMode 
+        ? AndroidProvider.debug 
+        : AndroidProvider.playIntegrity,
+  );
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
