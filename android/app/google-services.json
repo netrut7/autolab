@@ -18,7 +18,8 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.auto.autolab",
-            "certificate_hash": "6572483bc1a8e2aceac258f9f4bcd006ff769a1e"
+            "certificate_hash": "6572483bc1a8e2aceac258f9f4bcd006ff769a1e",
+            "certificate_hash_sha256": "2aa27dfb536f2de73d39782e06447455226396d57181c36673fd9bde762a86b"
           }
         },
         {

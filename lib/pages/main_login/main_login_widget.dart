@@ -352,60 +352,69 @@ class _MainLoginWidgetState extends State<MainLoginWidget> {
                       padding:
                           EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
                       child: FFButtonWidget(
-                        onPressed: () async {
-                          var _shouldSetState = false;
-                          _model.loginCheck = await queryUsersRecordOnce(
-                            queryBuilder: (usersRecord) => usersRecord.where(
-                              'phone_number',
-                              isEqualTo: _model.mobileTextController.text,
-                            ),
-                            singleRecord: true,
-                          ).then((s) => s.firstOrNull);
-                          _shouldSetState = true;
-                          if (_model.loginCheck?.uid != null &&
-                              _model.loginCheck?.uid != '') {
-                            final phoneNumberVal =
-                                _model.mobileTextController.text;
-                            if (phoneNumberVal.isEmpty ||
-                                !phoneNumberVal.startsWith('+')) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Phone Number is required and has to start with +.'),
-                                ),
-                              );
-                              return;
-                            }
-                            await authManager.beginPhoneAuth(
-                              context: context,
-                              phoneNumber: phoneNumberVal,
-                              onCodeSent: (context) async {
-                                context.goNamedAuth(
-                                  OtpWidget.routeName,
-                                  context.mounted,
-                                  queryParameters: {
-                                    'usersavelogin': serializeParam(
-                                      _model.loginCheck?.reference,
-                                      ParamType.DocumentReference,
-                                    ),
-                                  }.withoutNulls,
-                                  ignoreRedirect: true,
-                                );
-                              },
-                            );
-
-                            if (_shouldSetState) safeSetState(() {});
-                            return;
-                          } else {
-                            context.goNamed(SignupWidget.routeName);
-
-                            if (_shouldSetState) safeSetState(() {});
-                            return;
-                          }
-
-                          if (_shouldSetState) safeSetState(() {});
-                        },
-                        text: 'Login',
+  onPressed: () async {
+    print('Login button pressed');
+    var _shouldSetState = false;
+    try {
+      print('Querying Firestore for user...');
+      _model.loginCheck = await queryUsersRecordOnce(
+        queryBuilder: (usersRecord) => usersRecord.where(
+          'phone_number',
+          isEqualTo: _model.mobileTextController.text,
+        ),
+        singleRecord: true,
+      ).then((s) => s.firstOrNull);
+      print('Firestore query result: ${_model.loginCheck}');
+      _shouldSetState = true;
+      if (_model.loginCheck?.uid != null &&
+          _model.loginCheck?.uid != '') {
+        final phoneNumberVal = _model.mobileTextController.text;
+        print('Phone number: $phoneNumberVal');
+        if (phoneNumberVal.isEmpty ||
+            !phoneNumberVal.startsWith('+')) {
+          print('Invalid phone number format');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Phone Number is required and has to start with +.'),
+            ),
+          );
+          return;
+        }
+        print('Starting phone auth...');
+        await authManager.beginPhoneAuth(
+          context: context,
+          phoneNumber: phoneNumberVal,
+          onCodeSent: (context) async {
+            print('OTP sent, navigating to OTP screen');
+            context.goNamedAuth(
+              OtpWidget.routeName,
+              context.mounted,
+              queryParameters: {
+                'usersavelogin': serializeParam(
+                  _model.loginCheck?.reference,
+                  ParamType.DocumentReference,
+                ),
+              }.withoutNulls,
+              ignoreRedirect: true,
+            );
+          },
+        );
+        print('Phone auth finished');
+        if (_shouldSetState) safeSetState(() {});
+        return;
+      } else {
+        print('User not found, navigating to signup');
+        context.goNamed(SignupWidget.routeName);
+        if (_shouldSetState) safeSetState(() {});
+        return;
+      }
+    } catch (e) {
+      print('Login error: $e');
+    }
+    if (_shouldSetState) safeSetState(() {});
+  },
+  text: 'Login',
                         options: FFButtonOptions(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 50.0,
